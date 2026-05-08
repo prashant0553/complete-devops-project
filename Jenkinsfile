@@ -55,7 +55,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                bat 'docker login -u prashant0553 -p YOUR_PASSWORD'
+                bat 'docker login -u prashant0553 -p your_real_password'
                 bat 'docker push prashant0553/devops-node-app'
             }
         }
