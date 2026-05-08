@@ -35,8 +35,46 @@
 //     }
 // }
 
+
+// pipeline {
+//     agent any
+
+//     stages {
+
+//         stage('Clone Code') {
+//             steps {
+//                 git branch: 'main',
+//                 url: 'https://github.com/prashant0553/complete-devops-project.git'
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 bat 'docker build -t prashant0553/devops-node-app .'
+//             }
+//         }
+
+//         stage('Push Docker Image') {
+//             steps {
+//                 bat 'docker login -u prashant0553 -p your_real_password'
+//                 bat 'docker push prashant0553/devops-node-app'
+//             }
+//         }
+
+//         stage('Deploy Kubernetes') {
+//             steps {
+//                 echo 'Deploying to Kubernetes...'
+//             }
+//         }
+//     }
+// }
+
 pipeline {
     agent any
+
+    environment {
+        IMAGE_NAME = "prashant0553/devops-node-app"
+    }
 
     stages {
 
@@ -49,20 +87,27 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t prashant0553/devops-node-app .'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                bat 'docker login -u prashant0553 -p your_real_password'
-                bat 'docker push prashant0553/devops-node-app'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                    bat 'docker push %IMAGE_NAME%'
+                }
             }
         }
 
         stage('Deploy Kubernetes') {
             steps {
-                echo 'Deploying to Kubernetes...'
+                echo 'Deploying to Kubernetes'
             }
         }
     }
